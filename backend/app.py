@@ -8,6 +8,7 @@ from sqlalchemy.exc import IntegrityError
 import os
 from dotenv import load_dotenv
 from marshmallow import ValidationError 
+from werkzeug.security import check_password_hash 
 
 
 from models.user import User
@@ -179,6 +180,7 @@ def create_answer():
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
+# REGISTER 
 
 @app.route('/register', methods=["POST"])
 def register_user():
@@ -189,7 +191,7 @@ def register_user():
 
     if not name or not email or not password:
         return jsonify({"error": "Please check the required fields"}), 400
-    
+
     try:  # hay que implementar aquí la validación, si no la validación del esquema no se aplica y la solicitud POST se crea igual aunque no se cumpla el criterio 
         data = {
             'user_name': name,
@@ -218,6 +220,45 @@ def register_user():
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
+
+
+
+@app.route('/login', methods=["POST"])
+def login():
+
+    user_email = request.json.get('user_email')
+    admin_email = request.json.get('admin_email')
+    password = request.json.get('user_pwd') or request.json.get('admin_pwd') 
+
+
+    if not password:
+        return jsonify({"error": "Please provide both email and password"}), 400
+
+
+    if user_email:
+        user = User.query.filter_by(user_email=user_email).first()
+
+        if user and check_password_hash(user.user_pwd, password):
+            return jsonify({"message": f"Bienvenido {user.user_name}."}), 200
+        else:
+            return jsonify({"error": "Credenciales incorrectas"}), 401
+
+
+    elif admin_email:
+        admin = Admin.query.filter_by(admin_email=admin_email).first()
+
+        if admin and check_password_hash(admin.admin_pwd, password):
+            return jsonify({"message": f"Bienvenido admin: {admin.admin_name}."}), 200
+
+
+        else:
+            return jsonify({"error": "Credenciales incorrectas"}), 401
+
+
+    return jsonify({"error": "Please provide both email and password"}), 400
+
+
+
 
 @app.route('/user', methods=["POST"])
 def create_user():
