@@ -11,6 +11,7 @@ from marshmallow import ValidationError
 from werkzeug.security import check_password_hash 
 import jwt
 from datetime import datetime, timedelta
+from functools import wraps
 
 
 from models.user import User
@@ -219,7 +220,7 @@ def register_user():
 
     except IntegrityError:
         db.session.rollback()  
-        return jsonify({"error": "El email ya está registrado."}), 400
+        return jsonify({"error": "The email is already registered"}), 400
 
     except Exception as e:
         db.session.rollback()
@@ -248,9 +249,9 @@ def login():
                 'exp': datetime.utcnow() + timedelta(hours=24)
             }, SECRET_KEY, algorithm="HS256")
 
-            return jsonify({"token": token, "message": f"Bienvenido {user.user_name}"}), 200
+            return jsonify({"token": token, "message": f"Welcome {user.user_name}"}), 200
 
-        return jsonify({"error": "Credenciales incorrectas"}), 401
+        return jsonify({"error": "Incorrect credentials"}), 401
 
     elif admin_email:
         admin = Admin.query.filter_by(admin_email=admin_email).first()
@@ -262,14 +263,41 @@ def login():
                 'exp': datetime.utcnow() + timedelta(hours=24)
             }, SECRET_KEY, algorithm="HS256") # Verificar que recibo el token en postman, tanto para admin como user
 
-            return jsonify({"token": token, "message": f"Bienvenido admin: {admin.admin_name}"}), 200
+            return jsonify({"token": token, "message": f"Welcome admin: {admin.admin_name}"}), 200
 
-        return jsonify({"error": "Credenciales incorrectas"}), 401
+        return jsonify({"error": "Incorrect credentials"}), 401
 
     return jsonify({"error": "Please provide both email and password"}), 400
 
+# Control de acceso basado en roles
+
+def admin_permits(func): # Es un decorador por eso toma otra función a decorar como argumento (pertenecea functools, importar)
+    @wraps(func) # Es otro decorador que va dentro de otro decorador que garantiza que esa funcion decorada esté disponible para su uso más adelante
+    def admin_access_only(*args, **kwargs): # función que verifica q se trate de un admin
+        token = request.headers.get('Authorization')
+        
+        if not token:
+            return jsonify({"error": "Token not provided"}), 401
+        
+        try:
+            decoded_token = jwt.decode(token.split(" ")[1], SECRET_KEY, algorithms=["HS256"])
+            
+            if decoded_token['role'] != 'admin':
+                return jsonify({"error": "You do not have permission to access this route"}), 403
+            
+        except jwt.ExpiredSignatureError:
+            return jsonify({"error": "The token has expired"}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({"error": "Invalid token"}), 401
+        
+        return func(*args, **kwargs)# indico que se retorne la función original decorada cn todos los argumentos que recibe
+
+    return admin_access_only
+
+
 
 @app.route('/user', methods=["POST"])
+@admin_permits  # Aqui paso el decorador (HOC simil) que envuelve a esta función y con la verificaciónde permisos anteriro solo permite el acceso a la ruta si es admin
 def create_user():
 
     name = request.json.get('user_name')
@@ -304,7 +332,7 @@ def create_user():
 
     except IntegrityError:
         db.session.rollback()  
-        return jsonify({"error": "El email ya está registrado."}), 400
+        return jsonify({"error": "The email is already registered"}), 400
           
     try:
         new_user = User(user_name=name,user_email=email,user_pwd= password)
@@ -316,7 +344,7 @@ def create_user():
     
     except IntegrityError:
         db.session.rollback()  
-        return jsonify({"error": "El email ya está registrado."}), 400
+        return jsonify({"error": "The email is already registered"}), 400
 
     except Exception as e:
         db.session.rollback()
@@ -403,7 +431,7 @@ def assign_tag():
         if resource_input == 'curso':
             curso = Curso.query.get(resource_id_input)
             if not curso:
-                return jsonify({"error": "Curso not found"}), 404
+                return jsonify({"error": "Course not found"}), 404
 
             tag.tag_curso_id = curso.curso_id 
 
@@ -427,7 +455,7 @@ def assign_tag():
         elif resource_input == 'pregunta':
             pregunta = QuizPregunta.query.get(resource_id_input)
             if not pregunta:
-                return jsonify({"error": "Pregunta not found"}), 404
+                return jsonify({"error": "Question not found"}), 404
 
             tag.tag_quiz_pregunta_id = pregunta.quiz_pregunta_id
                     
@@ -748,12 +776,12 @@ def delete_respuesta(quiz_respuesta_id):
     try:
         respuesta = QuizRespuesta.query.get(quiz_respuesta_id)
         if not respuesta:
-            return jsonify({"error": "Respuesta not found"}), 404
+            return jsonify({"error": "Answer not found"}), 404
 
         db.session.delete(respuesta)
         db.session.commit()
 
-        return jsonify({"message": "Respuesta deleted successfully"}), 200
+        return jsonify({"message": "Answer deleted successfully"}), 200
 
     except Exception as e:
         db.session.rollback()
@@ -923,7 +951,7 @@ def update_curso(curso_id):
     try:
         curso = Curso.query.get(curso_id)
         if not curso:
-            return jsonify({"error": "Curso not found"}), 404
+            return jsonify({"error": "Course not found"}), 404
 
         if name:
             curso.curso_name = name
@@ -933,7 +961,7 @@ def update_curso(curso_id):
             curso.curso_level = level
 
         db.session.commit()
-        return jsonify({"message": "Curso updated successfully"}), 200
+        return jsonify({"message": "Course updated successfully"}), 200
 
     except Exception as e:
         db.session.rollback()
@@ -948,7 +976,7 @@ def update_pregunta(quiz_pregunta_id):
     try:
         question = QuizPregunta.query.get(quiz_pregunta_id)
         if not question:
-            return jsonify({"error": "Pregunta not found"}), 404
+            return jsonify({"error": "Question not found"}), 404
 
         if nivel:
             question.quiz_pregunta_nivel = nivel
@@ -956,7 +984,7 @@ def update_pregunta(quiz_pregunta_id):
             question.quiz_pregunta_contenido = pregunta
 
         db.session.commit()
-        return jsonify({"message": "Pregunta updated successfully"}), 200
+        return jsonify({"message": "Question updated successfully"}), 200
 
     except Exception as e:
         db.session.rollback()
@@ -981,7 +1009,7 @@ def update_respuesta(quiz_respuesta_id):
             answer.quiz_respuesta_opcion = respuesta_opcion
 
         db.session.commit()
-        return jsonify({"message": "Respuesta updated successfully"}), 200
+        return jsonify({"message": "Answer updated successfully"}), 200
 
     except Exception as e:
         db.session.rollback()
