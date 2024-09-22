@@ -9,6 +9,8 @@ import os
 from dotenv import load_dotenv
 from marshmallow import ValidationError 
 from werkzeug.security import check_password_hash 
+import jwt
+from datetime import datetime, timedelta
 
 
 from models.user import User
@@ -33,6 +35,8 @@ from schemas.quiz_respuesta_schema import quiz_respuesta_schema, quiz_respuestas
 load_dotenv()
 
 app = Flask(__name__)
+SECRET_KEY = os.getenv('SECRET_KEY')
+
 app.config.from_pyfile('config.py')
 
 """
@@ -228,36 +232,41 @@ def login():
 
     user_email = request.json.get('user_email')
     admin_email = request.json.get('admin_email')
-    password = request.json.get('user_pwd') or request.json.get('admin_pwd') 
-
+    password = request.json.get('user_pwd') or request.json.get('admin_pwd')
 
     if not password:
         return jsonify({"error": "Please provide both email and password"}), 400
-
 
     if user_email:
         user = User.query.filter_by(user_email=user_email).first()
 
         if user and check_password_hash(user.user_pwd, password):
-            return jsonify({"message": f"Bienvenido {user.user_name}."}), 200
-        else:
-            return jsonify({"error": "Credenciales incorrectas"}), 401
+             
+            token = jwt.encode({
+                'user_id': user.user_id,
+                'role': 'user',  # lo debo añadir aunq no exista en mi modelo
+                'exp': datetime.utcnow() + timedelta(hours=24)
+            }, SECRET_KEY, algorithm="HS256")
 
+            return jsonify({"token": token, "message": f"Bienvenido {user.user_name}"}), 200
+
+        return jsonify({"error": "Credenciales incorrectas"}), 401
 
     elif admin_email:
         admin = Admin.query.filter_by(admin_email=admin_email).first()
 
         if admin and check_password_hash(admin.admin_pwd, password):
-            return jsonify({"message": f"Bienvenido admin: {admin.admin_name}."}), 200
+            token = jwt.encode({
+                'admin_id': admin.admin_id,
+                'role': 'admin',  
+                'exp': datetime.utcnow() + timedelta(hours=24)
+            }, SECRET_KEY, algorithm="HS256") # Verificar que recibo el token en postman, tanto para admin como user
 
+            return jsonify({"token": token, "message": f"Bienvenido admin: {admin.admin_name}"}), 200
 
-        else:
-            return jsonify({"error": "Credenciales incorrectas"}), 401
-
+        return jsonify({"error": "Credenciales incorrectas"}), 401
 
     return jsonify({"error": "Please provide both email and password"}), 400
-
-
 
 
 @app.route('/user', methods=["POST"])
