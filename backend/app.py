@@ -60,6 +60,7 @@ def home():
 # TODO buscar información sobre blueprints y/o como refactorizar
 
 @app.route('/blog', methods=["POST"])
+@admin_permits
 def create_blog():
 
     title = request.json.get('blog_title')
@@ -84,6 +85,7 @@ def create_blog():
 
 
 @app.route('/video', methods=["POST"])
+@admin_permits
 def create_video():
 
     title = request.json.get('video_title')
@@ -109,6 +111,7 @@ def create_video():
 
 
 @app.route('/curso', methods=["POST"])
+@admin_permits
 def create_curso():
 
     name = request.json.get('curso_name')
@@ -134,6 +137,7 @@ def create_curso():
 
 
 @app.route('/pregunta', methods=["POST"])
+@admin_permits
 def create_question():
 
     nivel = request.json.get('quiz_pregunta_nivel')
@@ -158,6 +162,7 @@ def create_question():
     
 
 @app.route('/respuesta', methods=["POST"])
+@admin_permits
 def create_answer():
 
     respuesta = request.json.get('quiz_respuesta_contenido')
@@ -351,6 +356,7 @@ def create_user():
         return jsonify({"error": str(e)}), 500
 
 @app.route('/admin', methods=["POST"])
+@admin_permits 
 def create_admin():
 
     name = request.json.get('admin_name')
@@ -395,6 +401,7 @@ def create_admin():
         return jsonify({"error": str(e)}), 500
 
 @app.route('/tag', methods=["POST"])
+@admin_permits 
 def assign_tag():
 
     tag_input = request.json.get('tag_name')
@@ -471,6 +478,7 @@ def assign_tag():
 # SOLICITUDES GET
 
 @app.route('/user/<int:user_id>', methods=['GET'])
+@admin_permits 
 def get_user(user_id):
     from schemas.user_schema import user_schema
     user = User.query.get(user_id)
@@ -491,6 +499,7 @@ def get_users():
 #admin
 
 @app.route('/admin/<int:admin_id>', methods=['GET'])
+@admin_permits 
 def get_admin(admin_id):
     from models.admin import Admin
     admin = Admin.query.get(admin_id)
@@ -639,7 +648,7 @@ def get_tags_by_quiz_pregunta(resource_id):
         tags = Tag.query.filter_by(tag_curso_id=resource_id).all() 
     
     else:
-        return jsonify({'error': 'Tipo no válido'}), 400  # Manejar tipos no válidos
+        return jsonify({'error': 'Tipo no válido'}), 400  
 
     if not tags: 
         return jsonify({'error': 'No tags found'}), 404 
@@ -659,6 +668,7 @@ def get_tags_by_quiz_pregunta(resource_id):
 # Delete
 
 @app.route('/blog/<int:blog_id>', methods=["DELETE"])
+@admin_permits 
 def delete_blog(blog_id):
     try:
         blog = Blog.query.get(blog_id)
@@ -675,6 +685,7 @@ def delete_blog(blog_id):
         return jsonify({"error": str(e)}), 500
 
 @app.route('/blogs', methods=["DELETE"])
+@admin_permits 
 def delete_all_blogs():
     try:
         Blog.query.delete()
@@ -688,6 +699,7 @@ def delete_all_blogs():
 
 
 @app.route('/video/<int:video_id>', methods=["DELETE"])
+@admin_permits 
 def delete_video(video_id):
     try:
         video = Video.query.get(video_id)
@@ -704,6 +716,7 @@ def delete_video(video_id):
         return jsonify({"error": str(e)}), 500
 
 @app.route('/videos', methods=["DELETE"])
+@admin_permits 
 def delete_all_videos():
     try:
         Video.query.delete()
@@ -716,6 +729,7 @@ def delete_all_videos():
         return jsonify({"error": str(e)}), 500
 
 @app.route('/curso/<int:curso_id>', methods=["DELETE"])
+@admin_permits 
 def delete_curso(curso_id):
     try:
         curso = Curso.query.get(curso_id)
@@ -732,6 +746,7 @@ def delete_curso(curso_id):
         return jsonify({"error": str(e)}), 500
 
 @app.route('/cursos', methods=["DELETE"])
+@admin_permits 
 def delete_all_cursos():
     try:
         Curso.query.delete()
@@ -744,6 +759,7 @@ def delete_all_cursos():
         return jsonify({"error": str(e)}), 500
 
 @app.route('/pregunta/<int:quiz_pregunta_id>', methods=["DELETE"])
+@admin_permits 
 def delete_pregunta(quiz_pregunta_id):
     try:
         pregunta = QuizPregunta.query.get(quiz_pregunta_id)
@@ -760,6 +776,7 @@ def delete_pregunta(quiz_pregunta_id):
         return jsonify({"error": str(e)}), 500
 
 @app.route('/preguntas', methods=["DELETE"])
+@admin_permits 
 def delete_all_preguntas():
     try:
         QuizPregunta.query.delete()
@@ -772,6 +789,7 @@ def delete_all_preguntas():
         return jsonify({"error": str(e)}), 500
 
 @app.route('/respuesta/<int:quiz_respuesta_id>', methods=["DELETE"])
+@admin_permits 
 def delete_respuesta(quiz_respuesta_id):
     try:
         respuesta = QuizRespuesta.query.get(quiz_respuesta_id)
@@ -789,6 +807,7 @@ def delete_respuesta(quiz_respuesta_id):
 
 
 @app.route('/respuestas', methods=["DELETE"])
+@admin_permits 
 def delete_all_respuestas():
     try:
         QuizRespuesta.query.delete()
@@ -801,6 +820,7 @@ def delete_all_respuestas():
         return jsonify({"error": str(e)}), 500
 
 @app.route('/user/<int:user_id>', methods=["DELETE"])
+@admin_permits 
 def delete_user(user_id):
     try:
         user = User.query.get(user_id)
@@ -817,6 +837,7 @@ def delete_user(user_id):
         return jsonify({"error": str(e)}), 500
 
 @app.route('/users', methods=["DELETE"])
+@admin_permits 
 def delete_all_users():
     try:
         User.query.delete()
@@ -830,6 +851,7 @@ def delete_all_users():
 
 
 @app.route('/admin/<int:admin_id>', methods=["DELETE"])
+@admin_permits 
 def delete_admin(admin_id):
     try:
         admin = Admin.query.get(admin_id)
@@ -846,6 +868,7 @@ def delete_admin(admin_id):
         return jsonify({"error": str(e)}), 500
 
 @app.route('/admins', methods=["DELETE"])
+@admin_permits 
 def delete_all_admins():
     try:
         Admin.query.delete()
@@ -859,6 +882,7 @@ def delete_all_admins():
 
 
 @app.route('/tag/<int:tag_id>', methods=["DELETE"])
+@admin_permits 
 def delete_tag(tag_id):
     try:
         tag = Tag.query.get(tag_id)
@@ -875,6 +899,7 @@ def delete_tag(tag_id):
         return jsonify({"error": str(e)}), 500
 
 @app.route('/tags', methods=["DELETE"])
+@admin_permits 
 def delete_all_tags():
     try:
         Tag.query.delete()
@@ -889,6 +914,7 @@ def delete_all_tags():
 # Put
 
 @app.route('/blog/<int:blog_id>', methods=["PUT"])
+@admin_permits 
 def update_blog(blog_id):
     title = request.json.get('blog_title')
     content = request.json.get('blog_content')
@@ -915,6 +941,7 @@ def update_blog(blog_id):
 
 
 @app.route('/video/<int:video_id>', methods=["PUT"])
+@admin_permits 
 def update_video(video_id):
     title = request.json.get('video_title')
     content = request.json.get('video_content')
@@ -943,6 +970,7 @@ def update_video(video_id):
 
 
 @app.route('/curso/<int:curso_id>', methods=["PUT"])
+@admin_permits 
 def update_curso(curso_id):
     name = request.json.get('curso_name')
     description = request.json.get('curso_description')
@@ -969,6 +997,7 @@ def update_curso(curso_id):
 
 
 @app.route('/pregunta/<int:quiz_pregunta_id>', methods=["PUT"])
+@admin_permits 
 def update_pregunta(quiz_pregunta_id):
     nivel = request.json.get('quiz_pregunta_nivel')
     pregunta = request.json.get('quiz_pregunta_contenido')
@@ -991,6 +1020,7 @@ def update_pregunta(quiz_pregunta_id):
         return jsonify({"error": str(e)}), 500
 
 @app.route('/respuesta/<int:quiz_respuesta_id>', methods=["PUT"])
+@admin_permits 
 def update_respuesta(quiz_respuesta_id):
     respuesta = request.json.get('quiz_respuesta_contenido')
     es_correcta = request.json.get('quiz_respuesta_correcta')
@@ -1016,6 +1046,7 @@ def update_respuesta(quiz_respuesta_id):
         return jsonify({"error": str(e)}), 500
 
 @app.route('/user/<int:user_id>', methods=["PUT"])
+@admin_permits 
 def update_user(user_id):
     name = request.json.get('user_name')
     email = request.json.get('user_email')
@@ -1041,6 +1072,7 @@ def update_user(user_id):
         return jsonify({"error": str(e)}), 500
 
 @app.route('/admin/<int:admin_id>', methods=["PUT"])
+@admin_permits 
 def update_admin(admin_id):
     name = request.json.get('admin_name')
     email = request.json.get('admin_email')
@@ -1069,6 +1101,7 @@ def update_admin(admin_id):
         return jsonify({"error": str(e)}), 500
 
 @app.route('/tag/<int:tag_id>', methods=["PUT"])
+@admin_permits 
 def update_tag(tag_id):
     tag_input = request.json.get('tag_name')
 
