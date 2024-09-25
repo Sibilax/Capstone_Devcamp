@@ -6,7 +6,7 @@ from .video import Video
 
 class Tag(db.Model):
     tag_id = db.Column(db.Integer, primary_key=True, autoincrement=True, unique=True, nullable=False)
-    tag_name = db.Column(db.String(255), unique=True, nullable=False)
+    tag_name = db.Column(db.String(255), unique=False, nullable=False)
     tag_curso_id = db.Column(db.Integer, db.ForeignKey('curso.curso_id'), nullable=True)
     tag_quiz_pregunta_id = db.Column(db.Integer, db.ForeignKey('quiz_pregunta.quiz_pregunta_id'), nullable=True)
     tag_blog_id = db.Column(db.Integer, db.ForeignKey('blog.blog_id'), nullable=True)
