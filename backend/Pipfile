@@ -16,6 +16,7 @@ flask-jwt-extended = "*"
 flask-migrate = "*"
 psycopg2 = "*"
 marshmallow = "*"
+flask-cors = "*"
 
 [dev-packages]
 
