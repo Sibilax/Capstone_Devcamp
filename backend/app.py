@@ -19,7 +19,7 @@ app = Flask(__name__)
 
 app.config.from_object(Config)
 app.config['JWT_ALGORITHM'] = 'HS256'
-CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
+CORS(app)
 db.init_app(app)
 
 ma = Marshmallow(app)

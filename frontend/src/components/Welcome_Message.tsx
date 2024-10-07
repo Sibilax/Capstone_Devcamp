@@ -1,5 +1,5 @@
 const WelcomeMessage: React.FC = () => {
-  //TODO: evaluar si paso props o lo ahgo des scss
+  //TODO: evaluar si paso props o lo hago desde scss
   return (
     <div>
       <h1>Welcome to EFL Companion!</h1>

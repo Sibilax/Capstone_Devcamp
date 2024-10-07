@@ -1,0 +1,36 @@
+@use './variables' as var; //más moderna que @import y da menos errores globales
+
+
+.footer-wrapper {
+    position: fixed;  /* Fija el footer en la parte inferior */
+    margin-bottom: 0;
+    width: 100%;      
+    height: 15vh;     
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background-color: var.$quiz-color;
+    z-index: 1000;    /* Asegura que el footer esté sobre otros elementos */
+
+
+
+    .footer-messages{
+        display: flex;
+        flex-direction: column;
+        align-items: center; 
+        justify-content: center;
+
+
+
+        h1 {
+            font-size: 2em;
+        }
+
+        svg {
+            margin-bottom: 10px; 
+          }
+
+        
+
+    }
+}

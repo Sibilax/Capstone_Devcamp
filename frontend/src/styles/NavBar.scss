@@ -1,81 +1,55 @@
+@use './variables' as var;
+
 .navbar-wrapper {
-    display:flex;
-    justify-content: space-around;
+  //position: fixed;
+  display: flex;
+  flex-direction: row; 
+  justify-content: center;
+  width: 100%;
+  background-color: var.$navbar-color;
+  height: 15vh;
+  //z-index: 1000;
+
+  .navbar-logo {
+    display: flex;
+    align-self: flex-start;
+    margin-left: 3vw;
+  }
+
+  .navbar-splash {
+    display: flex;
+    justify-content: space-between; 
     align-items: center;
     width: 100%;
-    height: 200px;
-    margin-right:120px;
-    margin: 0;
-    background-color: aquamarine;
+    padding: 0 20px; 
 
-
-    .navbar-logo {
+    .navbar-splash-name {
+      flex-grow: 1;
       display: flex;
-      margin-left: -5%;
-      
+      justify-content: center; 
+      font-size: 2em;
+    }
 
+    .navbar-splash-auth-links {
+      display: flex;
+      justify-content: flex-end; 
     }
 
 
-      .navbar-center {
-        display: flex;
-        justify-content: center;
-        
-        
-      }
-
-        .navbar-left {
-          display: flex;
-          //flex-direction: row;
-          
-    
-          .navbar-auth-links {
-            display: flex;
-            
-          
-            a {
-              color: black;
-              text-decoration: none;
-              justify-content: flex-end;
-              text-decoration: none;
-              margin-right:5vw;
-              transition: 0.5s ease-in-out;
-              border-bottom: 1px solid transparent; //para poder usar hover
-              
-              
-             
-
-              
-              
-              
-            }
-
-            &:hover {
-              border-bottom: 1px solid black; 
-
-            
-            }
-          }
-      
-        }
-
-        .navbar-nav-links-wrapper{
-          display: flex;
-          
-          .navbar-nav-links {
-            display: flex;
-            
-            a {
-
-              color: black;
-              text-decoration: none;
-              margin-right:10vw;
-
-            }
-          }
-        }
-
-    
-  
   }
-  
+
+  .navbar-nav-links-wrapper {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    margin-left: 10vw; 
+  }
+
+  .navbar-searchbar {
+    width: 100%;
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+  }
+}

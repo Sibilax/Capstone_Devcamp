@@ -1,5 +1,6 @@
 import WelcomeMessage from "../components/Welcome_Message";
-
+import splashImage from "../assets/splash.png";
+import "../styles/SplashPage.scss";
 
 const SplashPage: React.FC = () => {
   return (
@@ -9,8 +10,9 @@ const SplashPage: React.FC = () => {
       </div>
 
       <div className="splash-img">
-        <img src="" alt="img" />
+        <img src={splashImage} alt="img" />
       </div>
+
     </div>
   );
 };

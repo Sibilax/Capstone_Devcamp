@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom"; //para redirigir al usuario una vez registrado
+import signUp from "../assets/undraw_sign_up.svg";
 
 const Register = ({
   setIsLoggedIn,
@@ -18,7 +19,8 @@ const Register = ({
     //Especifica el tipo de evento que se está manejando (formulario)
     event.preventDefault(); //evito q se refresque al enviar los datos del form
 
-    try {  //envío datos del registro al backend
+    try {
+      //envío datos del registro al backend
       const response = await axios.post("http://localhost:5000/register", {
         user_name: userName,
         user_pwd: userPwd,
@@ -51,30 +53,44 @@ const Register = ({
   };
 
   return (
-    <form onSubmit={handleRegister}> 
-      <input
-        type="text"
-        value={userName}
-        onChange={(e) => setUserName(e.target.value)} {/*/ Cuando el usuario escribe, el estado que estaba definido como un string vacío "" se actualiza */}
-        placeholder="Enter your username"
-        required
-      />
-      <input
-        type="text"
-        value={userEmail}
-        onChange={(e) => setUserEmail(e.target.value)} {/*(e.target.value) es el valor actual que se está pasando al input --> e = event */}
-        placeholder="Enter your email"
-        required
-      />
-      <input
-        type="password"
-        value={userPwd}
-        onChange={(e) => setUserPwd(e.target.value)}
-        placeholder="Enter your password"
-        required
-      />
-      <button type="submit">Register</button> {/*  Aquí ejecuto <form onSubmit={handleRegister}> */}
-    </form>
+    <div className="form-page-wrapper">
+      <div className="form-section">
+        <form onSubmit={handleRegister}>
+          <div className="form-header">
+            <h1>Register</h1>
+            <p> Welcome aboard!</p>
+          </div>
+          <input
+            type="text"
+            value={userName}
+            onChange={(e) => setUserName(e.target.value)} //Cuando el usuario escribe, el estado que estaba definido como un string vacío "" se actualiza
+            placeholder="Enter your username"
+            required
+          />
+          <input
+            type="text"
+            value={userEmail}
+            onChange={(e) => setUserEmail(e.target.value)} //(e.target.value) es el valor actual que se está pasando al input --> e = event
+            placeholder="Enter your email"
+            required
+          />
+          <input
+            type="password"
+            value={userPwd}
+            onChange={(e) => setUserPwd(e.target.value)}
+            placeholder="Enter your password"
+            required
+          />
+          <button type="submit">Register</button>
+          {/*  Aquí ejecuto <form onSubmit={handleRegister}> */}
+        </form>
+      </div>
+
+      <div className="form-image-section">
+        <img src={signUp} alt="img" />
+        {/*debo llamar la imagen con el alias que le di al importar */}
+      </div>
+    </div>
   );
 };
 

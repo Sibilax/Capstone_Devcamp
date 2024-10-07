@@ -1,0 +1,79 @@
+@use './variables' as var; //más moderna que @import y da menos errores globales
+
+.form-page-wrapper {
+    display: flex;
+    height: 70vh; 
+  
+    
+  .form-image-section {
+    flex: 2; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 80%; 
+    height: auto;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 4);
+
+
+  }
+  
+  .form-section {
+    flex: 1; 
+    display: flex;
+    align-items: center; 
+    justify-content: center;
+    padding: 20px;
+    background-color: var.$background-color; 
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 4);
+  
+
+    .form-header h1{
+      font-size: 2em;
+      padding-bottom: 20%;
+    }
+
+    .form-header p{
+      font-size: 1em;
+      padding-bottom: 20%;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column; 
+      align-items: center;
+      height: 50%;
+      width: 60%; 
+      max-width: 350px; 
+      font-size: 1em;
+
+    }
+    
+    input {
+      width: 100%; 
+      padding: 10px;
+      margin-bottom: 10%; 
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    
+    button {
+      width: 100%; 
+      padding: 10px;
+      font-size: 16px;
+      background-color: #1AA0D0;
+      color: var.$background-color;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    button:hover {
+      background-color: #0056b3;
+    }
+    
+  }
+
+  
+}
+  

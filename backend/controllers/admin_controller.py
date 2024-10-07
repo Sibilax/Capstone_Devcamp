@@ -40,7 +40,8 @@ def create_admin():
     
         
     try:
-        new_admin = Admin(admin_name=name,admin_email=email,admin_pwd= password, admin_role = role)
+        new_admin = Admin(admin_name=name, admin_email=email, admin_pwd=password, admin_role=role)
+        new_admin.set_password(password)  # Encriptar la contraseña antes de guardar
 
         db.session.add(new_admin)
         db.session.commit()
@@ -121,7 +122,7 @@ def delete_all_admins():
 
 
 @admin_bp.route('/admin/<int:admin_id>', methods=["PUT"])
-@admin_permits 
+@admin_permits
 def update_admin(admin_id):
     name = request.json.get('admin_name')
     email = request.json.get('admin_email')
@@ -138,7 +139,7 @@ def update_admin(admin_id):
         if email:
             admin.admin_email = email
         if password:
-            admin.admin_pwd = password
+            admin.set_password(password)  # Asegurarse de encriptar la contraseña si es proporcionada
         if role:
             admin.admin_role = role
 
@@ -148,3 +149,4 @@ def update_admin(admin_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
+

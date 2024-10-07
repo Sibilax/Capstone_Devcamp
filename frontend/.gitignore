@@ -7,9 +7,11 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
+# Directorios de build
 dist
 dist-ssr
+
+# Archivos locales
 *.local
 
 # Editor directories and files
@@ -23,4 +25,5 @@ dist-ssr
 *.sln
 *.sw?
 
+# Dependencias de Node.js
 node_modules
