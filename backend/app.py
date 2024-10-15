@@ -18,10 +18,11 @@ load_dotenv()
 app = Flask(__name__)
 
 app.config.from_object(Config)
+CORS(app, resources={r"/*": {"origins": "https://sibilax-capstone-devcamp.herokuapp.com"}})
 app.config['JWT_ALGORITHM'] = 'HS256'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
-app.config['SQLALCHEMY_ECHO'] = True
-CORS(app)
+app.config['SQLALCHEMY_ECHO'] = False #si no se imprimen en la consola las consultas
+
 db.init_app(app)
 
 ma = Marshmallow(app)

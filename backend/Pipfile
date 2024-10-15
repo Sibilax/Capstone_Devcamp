@@ -14,9 +14,9 @@ pymysql = "*"
 cryptography = "*"
 flask-jwt-extended = "*"
 flask-migrate = "*"
-psycopg2 = "*"
 marshmallow = "*"
 flask-cors = "*"
+gunicorn = "*"
 
 [dev-packages]
 
