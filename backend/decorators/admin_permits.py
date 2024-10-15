@@ -1,14 +1,10 @@
-from flask import request, jsonify  
-from functools import wraps  # Para poder usar el decorador wraps
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity  # Para trabajar con JSON Web Tokens
-from dotenv import load_dotenv
+
 from flask import request, jsonify, current_app
-from functools import wraps
-
-from flask import request, jsonify  # Solo necesitas request y jsonify
 from functools import wraps  # Para poder usar el decorador wraps
-from flask_jwt_extended import jwt_required, get_jwt_identity  # Para proteger rutas y obtener identidad desde el token JWT sin tener que usar secret key, algoritmos, o authorization
+from dotenv import load_dotenv
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity  # Para trabajar con JSON Web Tokens
 
+load_dotenv()
 load_dotenv()
 
 # Decorador para verificar si el usuario es admin (similar a un HOC, es una función que da funcionalidades extra a otra sin modificarla) @admin_permits 

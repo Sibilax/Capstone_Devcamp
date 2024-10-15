@@ -63,9 +63,9 @@ def get_preguntas():
 
 
 
-
-@pregunta_bp.route('/preguntas_con_respuestas', methods=['GET'])
-def get_preguntas_con_respuestas():
+#sin filtrar por nivel
+@pregunta_bp.route('/preguntas_con_respuestas_todas', methods=['GET'])
+def get_preguntas_con_respuestas_todas():
     limit_preguntas = request.args.get('limit_preguntas', default=15, type=int)
     offset = request.args.get('offset', default=0, type=int)
 
@@ -80,10 +80,37 @@ def get_preguntas_con_respuestas():
     for pregunta in preguntas:
         resultado.append({
             'pregunta': quiz_pregunta_schema.dump(pregunta),
-            'respuestas': quiz_respuestas_schema.dump(pregunta.respuestas)
+            'respuestas': quiz_respuestas_schema.dump(pregunta.respuestas) #hago append de las respuestas vinculadas que recibí gracias a joinload, almaceno dos listas, una dentro de otra
         })
 
     return jsonify(resultado)
+
+
+
+@pregunta_bp.route('/preguntas_con_respuestas', methods=['GET'])
+def get_preguntas_con_respuestas():
+    nivel = request.args.get('nivel', default=None, type=str)
+    limit_preguntas = request.args.get('limit_preguntas', default=15, type=int)
+    offset = request.args.get('offset', default=0, type=int)
+
+    # Filtro por nivel si se proporciona
+    query = QuizPregunta.query.options(joinedload(QuizPregunta.respuestas))
+    if nivel:
+        query = query.filter_by(quiz_pregunta_nivel=nivel)
+
+    preguntas = query.limit(limit_preguntas).offset(offset).all()
+
+    if not preguntas:
+        return jsonify({'error': 'No questions found for this level'}), 404
+
+    resultado = []
+    for pregunta in preguntas:
+        resultado.append({
+            'pregunta': quiz_pregunta_schema.dump(pregunta),
+            'respuestas': quiz_respuestas_schema.dump(pregunta.respuestas)
+        })
+
+    return jsonify(resultado), 200  # Aseguramos que el código 200 se envía en caso de éxito
 
 
 
@@ -97,7 +124,7 @@ def delete_pregunta(quiz_pregunta_id):
         if not pregunta:
             return jsonify({"error": "Question not found"}), 404
 
-        db.session.delete(pregunta)  # importante: funciona sólo si he marcado on cascade en el modelo de la pregunta, así aparece en la FK de la bd
+        db.session.delete(pregunta)  # importante:  sólo borra resp he marcado on cascade en el modelo de la pregunta, así aparece en la FK de la bd
         db.session.commit()
 
         return jsonify({"message": "Question and associated answers deleted successfully"}), 200

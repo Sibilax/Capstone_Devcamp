@@ -3,6 +3,10 @@ from extensions import db
 from marshmallow.exceptions import ValidationError
 from sqlalchemy.exc import IntegrityError
 
+from models.curso import Curso   
+from models.blog import Blog   
+from models.video import Video   
+from models.quiz_pregunta import QuizPregunta   
 from models.tag import Tag
 from schemas.tag_schema import tag_schema, tags_schema  
 from decorators.admin_permits import admin_permits
@@ -84,6 +88,15 @@ def assign_tag():
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
+
+
+@tag_bp.route('/tags', methods=["GET"])   
+def get_all_tags():
+    try:
+        tags = Tag.query.all()   
+        return jsonify(tags_schema.dump(tags)), 200   
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500   
 
 
 

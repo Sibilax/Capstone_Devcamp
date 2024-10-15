@@ -52,8 +52,10 @@ def get_cursos():
     offset = request.args.get('offset', default=0, type=int)
 
     cursos = Curso.query.limit(limit).offset(offset).all()
+    
     if not cursos:
         return jsonify({'error': 'No courses found'}), 404  
+
     return jsonify(cursos_schema.dump(cursos))
 
 

@@ -1,70 +1,92 @@
 from flask import Blueprint, request, jsonify
 from extensions import db  
-from marshmallow.exceptions import ValidationError
-from sqlalchemy.exc import IntegrityError
-
 from models.blog import Blog  
 from models.video import Video 
 from models.tag import Tag 
 
 searchbar_bp = Blueprint('searchbar', __name__)
 
-
-@searchbar_bp.route('/search', methods=['GET'])  # http://localhost:5000/search?query=english&nivel=B2&limit=10&offset=0
+@searchbar_bp.route('/search', methods=['GET'])  # http://localhost:5000/search?query=english&limit=10&offset=0
 def searchbar():
-    # primero necesito los parámetros de búsqueda
+    # Se definen los parámetros de búsqueda
     query = request.args.get('query')  # Ej: "english", "blog", "video"
-    nivel = request.args.get('nivel')  # Ej: "B2"
     limit = request.args.get('limit', default=10, type=int)
     offset = request.args.get('offset', default=0, type=int)
-    
-    # Inicializa las consultas para blogs y videos (almaceno en una variable las tablas a las que tendrá acceso cada consulta)
-    blog_query = Blog.query
-    video_query = Video.query
 
-    # Establezco los criterios de búsqueda por palabra clave en título o contenido de mis tablas
+    # Se incializan las listas para los resultados
+    blog_results = []
+    video_results = []
+
+    # Si hay consulta, es decir, si se ha ingresado algo al input, buscamos tanto en tags como en títulos y contenidos
     if query:
-        keywords = query.split()  # Divido la consulta en palabras clave
-        
-        # Filtro los blogs que contengan las palabras clave en el título o el contenido
-        blog_query = blog_query.filter(     
-            db.or_(  # función que toma varias condiciones y devuelve True si al menos una de ellas es verdadera. PAra consultas dinámicas donde se combinan diferentes criterios de búsqueda. db =  instancia de la bd de sqlalchemy
-                *[Blog.blog_title.ilike(f"%{keyword}%") | Blog.blog_content.ilike(f"%{keyword}%") # asterisco (*) se utiliza para desempaquetar la lista y que los criterios de búsqueda se evalúen de a uno durante la iteración para ver si son true
-                for keyword in keywords]
-            )
-        )
+        keywords = query.split()  # Dividimos la consulta en palabras clave (por si hay más de una)
 
-        # Idem pero con videos
-        video_query = video_query.filter(
+        # Filtrar tags que coincidan con la palabra clave
+        tags = Tag.query.filter(
+            db.or_(   #función de sql alchemy para hacer consultas en bd
+                *[Tag.tag_name.ilike(f"%{keyword}%") for keyword in keywords]  #lista de expresiones a filtrar. Se indica la tabla, la columna, ilike para que no sea case sensitive y f"%{keyword}%" filtra cualquier cadena que contenga eso
+            )
+        ).limit(limit).offset(offset).all()
+
+        # Recorrer los tags encontrados y devolver los blogs y videos asociados
+        for tag in tags:
+            if tag.tag_blog_id:
+                blog = Blog.query.get(tag.tag_blog_id)
+                if blog:
+                    blog_results.append({
+                        'id': blog.blog_id,
+                        'title': blog.blog_title,
+                        'content': blog.blog_content
+                    })
+
+            if tag.tag_video_id:
+                video = Video.query.get(tag.tag_video_id)
+                if video:
+                    video_results.append({
+                        'id': video.video_id,
+                        'title': video.video_title,
+                        'content': video.video_content
+                    })
+
+        # Buscar en los títulos y contenidos de los blogs
+        blogs = Blog.query.filter(
+            db.or_(
+                *[Blog.blog_title.ilike(f"%{keyword}%") | Blog.blog_content.ilike(f"%{keyword}%")
+                  for keyword in keywords]
+            )
+        ).limit(limit).offset(offset).all()
+
+        # Añadir los blogs encontrados a los resultados
+        for blog in blogs:
+            blog_results.append({
+                'id': blog.blog_id,
+                'title': blog.blog_title,
+                'content': blog.blog_content
+            })
+
+        # Buscar en los títulos y contenidos de los videos
+        videos = Video.query.filter(
             db.or_(
                 *[Video.video_title.ilike(f"%{keyword}%") | Video.video_content.ilike(f"%{keyword}%")
-                for keyword in keywords]
+                  for keyword in keywords]
             )
-        )
+        ).limit(limit).offset(offset).all()
 
-    # Si se especifica un nivel, filtro por nivel en los tags
-    if nivel:
-        blog_query = blog_query.join(Tag, Blog.blog_id == Tag.tag_blog_id).filter(Tag.tag_name == nivel)
-        video_query = video_query.join(Tag, Video.video_id == Tag.tag_video_id).filter(Tag.tag_name == nivel)
+        # Añadir los videos encontrados a los resultados
+        for video in videos:
+            video_results.append({
+                'id': video.video_id,
+                'title': video.video_title,
+                'content': video.video_content
+            })
 
-    # Si el query no esta vacío y la palabra clave es "blog" y no "video", filtra solo los blogs
-    if query and 'blog' in query.lower() and 'video' not in query.lower():
-        video_query = None  # Como se busca "blog", no devolvemos videos
-    elif query and 'video' in query.lower() and 'blog' not in query.lower():
-        blog_query = None  # Como se busca "video", no devolvemos blogs
+        # Devolver los resultados en formato JSON
+        results = {
+            'blogs': blog_results,
+            'videos': video_results
+        }
 
-    # Ejecuto las consultas con limit y offset sólo si el query no se ha modificado a none(como arriba cuando no se busca blog y se lo vuelve none: video_query = None  )
-    blogs = blog_query.limit(limit).offset(offset).all() if blog_query is not None else []
-    videos = video_query.limit(limit).offset(offset).all() if video_query is not None else []
+        return jsonify(results)
 
-    # Convierto los resultados a formato JSON
-    blog_results = [{'id': blog.blog_id, 'title': blog.blog_title, 'content': blog.blog_content} for blog in blogs]
-    video_results = [{'id': video.video_id, 'title': video.video_title, 'content': video.video_content} for video in videos]
-
-    # Devolver los resultados en un diciionario para poder almacenar múltiples pares clave valor dentro (JSON).
-    results = {
-        'blogs': blog_results,
-        'videos': video_results
-    }
-    
-    return jsonify(results)
+    # Si no hay consulta, devolver un error
+    return jsonify({'error': 'No query provided'}), 400

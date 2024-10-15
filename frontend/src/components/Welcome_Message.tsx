@@ -1,8 +1,7 @@
 const WelcomeMessage: React.FC = () => {
-  //TODO: evaluar si paso props o lo hago desde scss
   return (
     <div>
-      <h1>Welcome to EFL Companion!</h1>
+      <div className="welcome-msg">WELCOME TO EFL COMPANION</div>
       <p>
         Embark on an enriching journey to master the English language with EFL
         Companion! Our platform is designed to enhance your skills across

@@ -74,7 +74,7 @@ def create_user():
     except ValidationError as err:
         return jsonify({
             "error": "Validation failed",
-            "fields": err.messages  # Para poder devolver el mensaje de error con el campo que falló
+            "fields": err.messages  
         }), 400
     
     try:

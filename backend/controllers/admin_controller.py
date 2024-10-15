@@ -139,7 +139,7 @@ def update_admin(admin_id):
         if email:
             admin.admin_email = email
         if password:
-            admin.set_password(password)  # Asegurarse de encriptar la contraseña si es proporcionada
+            admin.set_password(password)  # Hay q encriptarlo
         if role:
             admin.admin_role = role
 
